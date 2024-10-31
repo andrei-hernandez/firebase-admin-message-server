@@ -14,7 +14,7 @@ const orderDetails = {
   discount: null,
   totalAmount: 60,
   preparationTime: 15,
-  deliveryPartnerName: 'KIWI SOFTWARE FACTORY (Padre)',
+  deliveryPartnerName: 'ACME Food Delivery',
   distance: 0,
   notes: null,
   customerName: 'John Doe',
@@ -75,7 +75,7 @@ app.post("/send", function (req, res) {
       body: 'This is a Test Notification',
       orderDetails: JSON.stringify(orderDetails)
     },
-    token: "d0XQjRh5euhPWyEthP0pfI:APA91bErPekVChYKORCVAzxOedoISaAlHVOfgt4ApGW2zaaMFJv9qoAPAGJIiOVLFPHE0Vok7Dxfy3P3JJhYkQhCWifs2yIDuzWN3xeXE1_iBs_iZ17OK80YtrcC4e9Qd_5rQjTo-69u",
+    token: fcmToken,
   };
   
   getMessaging()
@@ -92,9 +92,36 @@ app.post("/send", function (req, res) {
       res.send(error);
       console.log("Error sending message:", error);
     });
-  
-  
 });
+
+app.post('/register', function (req, res) {
+
+  const body = {
+    token: req.body.token,
+    topic: req.body.topic
+  }
+
+  getMessaging()
+  .subscribeToTopic([body.token], body.topic)
+  .then((response) => {
+    // See the MessagingTopicManagementResponse reference documentation
+    // for the contents of response.
+    res.status(200).json({
+      message: "Successfully subscribed to topic",
+      token: body.token,
+      topic: body.topic,
+      response: response
+    })    
+  })
+  .catch((error) => {
+    res.status(500).json({
+      message: "Error subscribing to topic",
+      token: body.token,
+      topic: body.topic,
+      error: error
+    })
+  });
+})
 
 app.listen(4000, function () {
   console.log("Server started on port 4000");
